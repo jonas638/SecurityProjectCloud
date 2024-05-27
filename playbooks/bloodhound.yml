@@ -1,0 +1,46 @@
+---
+- name: Install Docker Engine on CentOS
+  hosts: rocky
+  become: true
+  vars:
+    dest_path: "/opt/BloodHound/examples/docker-compose"
+    docker_compose_file: "docker-compose.yml"
+  tasks:
+    - name: Install yum-utils
+      yum:
+        name: yum-utils
+        state: present
+
+    - name: Add Docker repository
+      shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: Install Docker packages
+      yum:
+        name: "docker-ce,docker-ce-cli,containerd.io,docker-buildx-plugin,docker-compose-plugin"
+        state: present
+        update_cache: yes
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Verify Docker installation
+      command: docker run hello-world
+
+    - name: Install git
+      yum:
+        name: git
+        state: present
+
+    - name: Clone repository
+      git:
+        repo: https://github.com/SpecterOps/BloodHound.git
+        dest: /opt/BloodHound
+        clone: yes
+
+    - name: Build and run the Docker Compose stack
+      command: docker compose -f "{{ dest_path }}/{{ docker_compose_file | basename }}" up --build -d
+      args:
+        chdir: "{{ dest_path }}"
