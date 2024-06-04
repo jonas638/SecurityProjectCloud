@@ -1,0 +1,37 @@
+---
+- name: Add cron jobs for various tasks
+  hosts: localhost
+  connection: local
+  become: yes
+  become_user: admin
+  tasks:
+    - name: Check if wrapper script for data stream creation exists
+      stat:
+        path: /home/admin/PythonElasticsearchScripts/initial_streams.sh
+      register: wrapper_script
+
+    - name: Add cron job to execute create_datastream.sh on reboot
+      cron:
+        name: "Run data stream creation script on reboot"
+        special_time: reboot
+        job: "/home/admin/PythonElasticsearchScripts/initial_streams.sh >> /home/admin/PythonElasticsearchScripts/Logs/datastream_creation.log 2>&1"
+      when: wrapper_script.stat.exists
+
+    - name: Add cron job to run sign-ins script every 3 minutes
+      cron:
+        name: "Run sign-ins script every 3 minutes"
+        minute: "*/3"
+        job: "python3 /home/admin/PythonElasticsearchScripts/tennantSignIns/signIns_to_datastream.py >> /home/admin/PythonElasticsearchScripts/Logs/sign_ins.log 2>&1"
+
+    - name: Add cron job to run security score script daily at 23:30
+      cron:
+        name: "Run security score script daily at 23:30"
+        minute: "30"
+        hour: "23"
+        job: "python3 /home/admin/PythonElasticsearchScripts/securityScore/securityScore.py >> /home/admin/PythonElasticsearchScripts/Logs/security_score.log 2>&1"
+
+    - name: Add cron job to run audit logs script every hour
+      cron:
+        name: "Run audit logs script every hour"
+        hour: "*/1"
+        job: "python3 /home/admin/PythonElasticsearchScripts/audit/audit_to_datastream.py >> /home/admin/PythonElasticsearchScripts/Logs/audit_logs.log 2>&1"

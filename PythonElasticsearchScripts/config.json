@@ -1,0 +1,11 @@
+{
+    "elasticsearch_host": "https://localhost:9200",
+    "graph_api_sign_ins_endpoint": "https://graph.microsoft.com/v1.0/auditLogs/signIns",
+    "graph_api_security_endpoint": "https://graph.microsoft.com/v1.0/security/secureScores",
+    "graph_api_audit_endpoint": "https://graph.microsoft.com/v1.0/auditLogs/directoryAudits",
+    "tenant_secret": "",
+    "client_id": "",
+    "tenant_id": "",
+    "security-onion_username": "",
+    "security-onion_password": ""
+}
