@@ -1,4 +1,10 @@
-# Select the image tag to use (latest, edge, or version number)
+# rename this file to .env.example
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+
 BLOODHOUND_TAG=latest
 
 # Postgres auth configuration
