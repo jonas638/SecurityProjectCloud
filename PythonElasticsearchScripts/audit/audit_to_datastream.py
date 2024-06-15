@@ -7,7 +7,6 @@ from datetime import datetime, timezone, timedelta
 from urllib3.exceptions import InsecureRequestWarning
 from elasticsearch import Elasticsearch
 
-# Suppress only the specific warning
 warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
 def load_config():
@@ -70,6 +69,14 @@ def read_last_query_time():
     except FileNotFoundError:
         return None
 
+def parse_datetime(datetime_str):
+    try:
+        return datetime.fromisoformat(datetime_str.rstrip('Z')).replace(tzinfo=timezone.utc)
+    except ValueError:
+        if '.' in datetime_str:
+            datetime_str = datetime_str.split('.')[0] + 'Z'
+        return datetime.fromisoformat(datetime_str.rstrip('Z')).replace(tzinfo=timezone.utc)
+
 def save_audit_logs_to_datastream(audit_logs, es, datastream_name):
     max_datetime_str = None
 
@@ -83,7 +90,8 @@ def save_audit_logs_to_datastream(audit_logs, es, datastream_name):
         es.index(index=datastream_name, body=audit_log)
     
     if max_datetime_str:
-        update_last_query_time(datetime.fromisoformat(max_datetime_str.replace("Z", "+00:00")).replace(tzinfo=timezone.utc))
+        max_datetime = parse_datetime(max_datetime_str)
+        update_last_query_time(max_datetime)
 
 config = load_config()
 
